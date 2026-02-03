@@ -2,15 +2,18 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronUp, ChevronDown } from "lucide-react"
+import { ChevronUp, ChevronDown, HelpCircle } from "lucide-react"
 import { ChatCard } from "./chat-card"
 import { mockChats, newIncomingChat, olderChats, type ChatItem } from "@/lib/chat-data"
 import { useI18n } from "@/lib/i18n"
+import { StaticLogo } from "@/components/icons/animated-logo"
 
 export function ChatListScreen({ 
-  onNavigateToContacts 
+  onNavigateToContacts,
+  onHelp
 }: { 
-  onNavigateToContacts?: () => void 
+  onNavigateToContacts?: () => void
+  onHelp?: () => void 
 }) {
   const { t } = useI18n()
   const [chats, setChats] = useState<ChatItem[]>(mockChats)
@@ -115,13 +118,29 @@ export function ChatListScreen({
 
   return (
     <div className="relative flex flex-col h-screen w-full bg-background overflow-hidden">
-      {/* Floating History Indicator - Absolute positioned above fading messages */}
-      <div className="absolute top-0 left-0 right-0 z-30 pointer-events-none">
+      {/* Header - Consistent with auth pages */}
+      <div className="absolute top-0 left-0 right-0 z-40 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">
+            {t.chat?.title || "Messages"}
+          </h1>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onHelp}
+              className="p-2 rounded-full hover:bg-muted/50 transition-colors"
+              aria-label={t.common?.help || "Help"}
+            >
+              <HelpCircle className="w-5 h-5 text-muted-foreground" />
+            </button>
+            <StaticLogo size="sm" className="text-foreground" />
+          </div>
+        </div>
+      </div>
+
+      {/* Floating History Indicator - Below header */}
+      <div className="absolute top-16 left-0 right-0 z-30 pointer-events-none">
         <div 
-          className="pt-5 pb-3 flex flex-col items-center justify-center"
-          style={{
-            background: 'linear-gradient(to bottom, hsl(var(--background)) 0%, hsl(var(--background)) 60%, transparent 100%)',
-          }}
+          className="pt-2 pb-3 flex flex-col items-center justify-center bg-gradient-to-b from-background via-background/60 to-transparent"
         >
           {/* Pull down hint with bouncing arrow */}
           <AnimatePresence>
@@ -165,15 +184,13 @@ export function ChatListScreen({
       <div 
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto scroll-smooth"
+        className="flex-1 overflow-y-auto scroll-smooth px-6"
         style={{
-          // Fast top fade (50px), moderate bottom fade (100px) = ~80% visible
-          maskImage: 'linear-gradient(to bottom, transparent 0%, black 50px, black calc(100% - 100px), transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 50px, black calc(100% - 100px), transparent 100%)',
-          paddingTop: '3.5rem',
+          // Fast top fade (80px for header), moderate bottom fade (100px) = ~80% visible
+          maskImage: 'linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 100px), transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 100px), transparent 100%)',
+          paddingTop: '5rem',
           paddingBottom: '8rem',
-          paddingLeft: '1rem',
-          paddingRight: '1rem',
         }}
       >
         {/* Pull down trigger area */}
@@ -213,7 +230,7 @@ export function ChatListScreen({
         </motion.div>
       </div>
 
-      {/* New Message Floating Bubble */}
+      {/* New Message Floating Bubble - Consistent with auth button style */}
       <AnimatePresence>
         {showNewMessageBubble && (
           <motion.button
@@ -222,15 +239,15 @@ export function ChatListScreen({
             exit={{ opacity: 0, y: 20, scale: 0.8 }}
             onClick={scrollToBottom}
             className="absolute bottom-32 left-1/2 -translate-x-1/2 z-40
-              px-4 py-2 rounded-full
+              px-6 py-3 rounded-xl
               bg-primary text-primary-foreground
-              shadow-lg shadow-primary/30
+              shadow-lg
               flex items-center gap-2
-              text-sm font-medium
-              hover:scale-105 active:scale-95 transition-transform"
+              text-base font-medium
+              hover:opacity-90 active:scale-95 transition-all"
           >
-            <ChevronDown className="w-4 h-4" />
-            New message
+            <ChevronDown className="w-5 h-5" />
+            {t.chat?.newMessage || "New message"}
           </motion.button>
         )}
       </AnimatePresence>

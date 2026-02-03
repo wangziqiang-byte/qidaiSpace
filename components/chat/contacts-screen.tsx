@@ -2,12 +2,15 @@
 
 import { useState, useCallback, useMemo, type TouchEvent } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { HelpCircle } from "lucide-react"
 import { 
   mockContacts, 
   getContactsByLetter, 
   getAlphabetIndex,
   type Contact 
 } from "@/lib/contacts-data"
+import { StaticLogo } from "@/components/icons/animated-logo"
+import { useI18n } from "@/lib/i18n"
 
 function ContactAvatar({ 
   contact, 
@@ -74,7 +77,7 @@ function ContactListItem({
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 320, damping: 26 }}
       onClick={onTap}
-      className="flex items-center gap-4 px-5 py-3 active:bg-muted/30 cursor-pointer"
+      className="flex items-center gap-4 py-3 active:bg-muted/50 cursor-pointer rounded-xl transition-colors"
     >
       <ContactAvatar contact={contact} size="md" />
       <div className="flex-1 min-w-0">
@@ -169,7 +172,12 @@ function AlphabetIndex({
   )
 }
 
-export function ContactsScreen() {
+export function ContactsScreen({ 
+  onHelp 
+}: { 
+  onHelp?: () => void 
+}) {
+  const { t } = useI18n()
   const [activeLetter, setActiveLetter] = useState<string | null>(null)
   const contactsByLetter = useMemo(() => getContactsByLetter(mockContacts), [])
   const alphabetIndex = useMemo(() => getAlphabetIndex(mockContacts), [])
@@ -190,17 +198,36 @@ export function ContactsScreen() {
 
   return (
     <div className="relative flex flex-col h-screen w-full bg-background overflow-hidden">
+      {/* Header - Consistent with auth pages */}
+      <div className="absolute top-0 left-0 right-0 z-40 px-6 py-4 bg-gradient-to-b from-background via-background to-transparent">
+        <div className="flex items-center justify-between">
+          <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">
+            {t.contacts?.title || "Contacts"}
+          </h1>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onHelp}
+              className="p-2 rounded-full hover:bg-muted/50 transition-colors"
+              aria-label={t.common?.help || "Help"}
+            >
+              <HelpCircle className="w-5 h-5 text-muted-foreground" />
+            </button>
+            <StaticLogo size="sm" className="text-foreground" />
+          </div>
+        </div>
+      </div>
+
       <div 
-        className="flex-1 overflow-y-auto pt-6 pb-32"
+        className="flex-1 overflow-y-auto pt-20 pb-32 px-6"
         style={{
-          maskImage: "linear-gradient(to bottom, black 0%, black calc(100% - 220px), transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to bottom, black 0%, black calc(100% - 220px), transparent 100%)",
+          maskImage: "linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 220px), transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 220px), transparent 100%)",
         }}
       >
         {Object.entries(contactsByLetter).map(([letter, contacts]) => (
           <div key={letter} id={`contact-section-${letter}`}>
-            <div className="sticky top-0 z-10 px-5 py-2 bg-background/80 backdrop-blur-sm">
-              <span className="text-xs font-semibold text-muted-foreground">{letter}</span>
+            <div className="sticky top-0 z-10 py-2 bg-background/80 backdrop-blur-sm">
+              <span className="text-sm font-semibold text-muted-foreground">{letter}</span>
             </div>
             {contacts.map((contact) => (
               <ContactListItem key={contact.id} contact={contact} onTap={() => handleContactTap(contact)} />

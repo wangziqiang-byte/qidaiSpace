@@ -29,10 +29,10 @@ export const ChatDock = forwardRef<HTMLDivElement, ChatDockProps>(
             relative flex items-center h-14
             transition-[width] duration-200 ease-out
             backdrop-blur-2xl 
-            bg-white/30
-            border border-white/40 
-            rounded-full 
-            shadow-xl shadow-black/10
+            bg-background/80
+            border border-border 
+            rounded-xl 
+            shadow-lg
             overflow-hidden
           "
           style={{ width: isContacts ? 216 : 172 }}
@@ -42,7 +42,7 @@ export const ChatDock = forwardRef<HTMLDivElement, ChatDockProps>(
               isContacts ? "opacity-100 scale-100 -translate-y-0" : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
             }`}
           >
-            <div className="w-9 h-9 rounded-full bg-white/40 border border-white/50 backdrop-blur-xl flex items-center justify-center text-foreground/60 shadow-md">
+            <div className="w-9 h-9 rounded-xl bg-muted/50 border border-border backdrop-blur-xl flex items-center justify-center text-muted-foreground shadow-md">
               <Search className="w-5 h-5" />
             </div>
           </div>

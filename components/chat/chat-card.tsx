@@ -74,10 +74,10 @@ const ChatCardComponent = ({
       data-chat-id={chat.id}
       onClick={onClick}
       className={`
-        relative px-4 py-4 rounded-2xl transition-colors duration-200 cursor-pointer
+        relative px-4 py-4 rounded-xl transition-colors duration-200 cursor-pointer
         ${isNewest 
-          ? 'bg-background border border-border/50 shadow-sm' 
-          : 'bg-transparent hover:bg-muted/30'
+          ? 'bg-card border border-border shadow-sm' 
+          : 'bg-transparent hover:bg-muted/50'
         }
       `}
     >
@@ -147,7 +147,7 @@ const ChatCardComponent = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: [0, 0.3, 0] }}
           transition={{ duration: 0.6 }}
-          className="absolute inset-0 rounded-2xl bg-primary/10 pointer-events-none" 
+          className="absolute inset-0 rounded-xl bg-primary/10 pointer-events-none" 
         />
       )}
     </motion.div>
