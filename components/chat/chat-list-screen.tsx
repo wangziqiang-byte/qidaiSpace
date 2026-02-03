@@ -4,14 +4,16 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronUp, ChevronDown } from "lucide-react"
 import { ChatCard } from "./chat-card"
-import { ChatDock } from "./chat-dock"
 import { mockChats, newIncomingChat, olderChats, type ChatItem } from "@/lib/chat-data"
 import { useI18n } from "@/lib/i18n"
 
-export function ChatListScreen() {
+export function ChatListScreen({ 
+  onNavigateToContacts 
+}: { 
+  onNavigateToContacts?: () => void 
+}) {
   const { t } = useI18n()
   const [chats, setChats] = useState<ChatItem[]>(mockChats)
-  const [activeTab, setActiveTab] = useState<"contacts" | "chat" | "settings">("chat")
   const [newChatId, setNewChatId] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [showPullHint, setShowPullHint] = useState(true)
@@ -20,13 +22,16 @@ export function ChatListScreen() {
   const [isNearBottom, setIsNearBottom] = useState(true)
   
   const scrollRef = useRef<HTMLDivElement>(null)
-  const dockRef = useRef<HTMLDivElement>(null)
 
   // Simulate new message arriving after 1 second
   useEffect(() => {
     const timer = setTimeout(() => {
-      setChats(prev => [...prev, { ...newIncomingChat, lastMessageTime: new Date() }])
-      setNewChatId(newIncomingChat.id)
+      const nextId = `new-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+      setChats(prev => [
+        ...prev,
+        { ...newIncomingChat, id: nextId, lastMessageTime: new Date() }
+      ])
+      setNewChatId(nextId)
       
       // Show new message bubble if user is not at bottom
       if (!isNearBottom) {
@@ -106,6 +111,7 @@ export function ChatListScreen() {
     })
     setShowNewMessageBubble(false)
   }
+
 
   return (
     <div className="relative flex flex-col h-screen w-full bg-background overflow-hidden">
@@ -229,12 +235,6 @@ export function ChatListScreen() {
         )}
       </AnimatePresence>
 
-      {/* Floating Dock */}
-      <ChatDock 
-        ref={dockRef}
-        activeTab={activeTab} 
-        onTabChange={setActiveTab} 
-      />
     </div>
   )
 }

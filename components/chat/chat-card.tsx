@@ -1,6 +1,6 @@
 "use client"
 
-import { memo } from "react"
+import { memo, useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { type ChatItem, formatChatTime } from "@/lib/chat-data"
 import { useI18n } from "@/lib/i18n"
@@ -23,6 +23,11 @@ const ChatCardComponent = ({
   onClick 
 }: ChatCardProps) => {
   const { language } = useI18n()
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
   
   // Generate initials for avatar
   const getInitials = (name: string) => {
@@ -110,7 +115,7 @@ const ChatCardComponent = ({
             </h3>
             {/* Time */}
             <span className="text-xs text-muted-foreground/60 flex-shrink-0 ml-2">
-              {formatChatTime(chat.lastMessageTime, language)}
+              {isMounted ? formatChatTime(chat.lastMessageTime, language) : ""}
             </span>
           </div>
           

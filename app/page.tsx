@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { AnimatePresence, motion } from "framer-motion"
 import { I18nProvider } from "@/components/providers/i18n-provider"
 import { ToastProvider } from "@/components/ui/error-toast"
 import { ScreenWrapper } from "@/components/auth/screen-wrapper"
@@ -18,6 +19,8 @@ import { PrivacyPolicyScreen, TermsOfServiceScreen } from "@/components/auth/leg
 import { NetworkErrorScreen, AccountBannedScreen, AccountLockedScreen, ServerErrorScreen } from "@/components/auth/error-screens"
 import { ScreenNavigator } from "@/components/auth/screen-navigator"
 import { ChatListScreen } from "@/components/chat/chat-list-screen"
+import { ContactsScreen } from "@/components/chat/contacts-screen"
+import { ChatDock } from "@/components/chat/chat-dock"
 
 type Screen = 
   | "opening"
@@ -37,6 +40,7 @@ type Screen =
   | "account-locked"
   | "server-error"
   | "chat-list"
+  | "contacts"
 
 const SCREENS: { id: Screen; label: string }[] = [
   { id: "opening", label: "Welcome" },
@@ -55,11 +59,13 @@ const SCREENS: { id: Screen; label: string }[] = [
   { id: "account-locked", label: "Locked" },
   { id: "account-banned", label: "Banned" },
   { id: "chat-list", label: "Chats" },
+  { id: "contacts", label: "Contacts" },
 ]
 
 function AuthFlowContent() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>("opening")
+  const [currentScreen, setCurrentScreen] = useState<Screen>("chat-list")
   const [previousScreen, setPreviousScreen] = useState<Screen>("opening")
+  const [activeTab, setActiveTab] = useState<"contacts" | "chat" | "settings">("chat")
   
   const currentIndex = useMemo(() => 
     SCREENS.findIndex(s => s.id === currentScreen), 
@@ -222,7 +228,10 @@ function AuthFlowContent() {
         )
 
       case "chat-list":
-        return <ChatListScreen />
+        return <ChatListScreen onNavigateToContacts={() => navigateTo("contacts")} />
+
+      case "contacts":
+        return <ContactsScreen />
       
       default:
         return <OpeningScreen onHelp={() => navigateTo("help")} />
@@ -232,7 +241,45 @@ function AuthFlowContent() {
   return (
     <>
       <ScreenWrapper>
-        {renderScreen()}
+        <div className="relative min-h-screen overflow-hidden">
+          <AnimatePresence mode="sync" initial={false}>
+            <motion.div
+              key={currentScreen}
+              initial={
+                (currentScreen === "chat-list" || currentScreen === "contacts") &&
+                (previousScreen === "chat-list" || previousScreen === "contacts")
+                  ? { x: "-100%", opacity: 0 }
+                  : { opacity: 0 }
+              }
+              animate={{ x: "0%", opacity: 1 }}
+              exit={
+                (currentScreen === "chat-list" || currentScreen === "contacts") &&
+                (previousScreen === "chat-list" || previousScreen === "contacts")
+                  ? { x: "100%", opacity: 0 }
+                  : { opacity: 0 }
+              }
+              transition={
+                (currentScreen === "chat-list" || currentScreen === "contacts") &&
+                (previousScreen === "chat-list" || previousScreen === "contacts")
+                  ? { type: "spring", stiffness: 240, damping: 28 }
+                  : { duration: 0.2 }
+              }
+              className="absolute inset-0"
+            >
+              {renderScreen()}
+            </motion.div>
+          </AnimatePresence>
+          {(currentScreen === "chat-list" || currentScreen === "contacts") && (
+            <ChatDock
+              activeTab={activeTab}
+              onTabChange={(tab) => {
+                setActiveTab(tab)
+                if (tab === "contacts") navigateTo("contacts")
+                if (tab === "chat") navigateTo("chat-list")
+              }}
+            />
+          )}
+        </div>
       </ScreenWrapper>
       {/* Development tool - hide in production */}
       {process.env.NODE_ENV === 'development' && (
